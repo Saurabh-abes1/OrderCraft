@@ -1,0 +1,234 @@
+<div class="suppliers-page">
+  <header class="page-header">
+    <div>
+      <div class="eyebrow">SUPPLIER RELATIONSHIPS</div>
+      <h1>Suppliers</h1>
+      <p>Manage supplier contacts and the companies that support your operations.</p>
+    </div>
+
+    <button
+      class="primary-button"
+      type="button"
+      (click)="resetForm(); successMessage = ''; errorMessage = ''"
+    >
+      <span>＋</span> Add supplier
+    </button>
+  </header>
+
+  <div class="notice success-notice" *ngIf="successMessage">
+    <span>✓</span> {{ successMessage }}
+  </div>
+
+  <div class="notice error-notice" *ngIf="errorMessage">
+    <span>!</span> {{ errorMessage }}
+  </div>
+
+  <section class="supplier-form-card">
+    <div class="section-heading">
+      <div>
+        <h2>{{ editingId === null ? 'Add a supplier' : 'Edit supplier' }}</h2>
+        <p>
+          {{
+            editingId === null
+              ? 'Enter the supplier details to add a supplier record.'
+              : 'Update the supplier information below.'
+          }}
+        </p>
+      </div>
+
+      <span class="form-step">
+        {{ editingId === null ? 'NEW SUPPLIER' : 'EDITING' }}
+      </span>
+    </div>
+
+    <form #supplierFormElement="ngForm" (ngSubmit)="saveSupplier()">
+      <div class="form-grid">
+        <label class="form-field">
+          <span>Supplier name <b>*</b></span>
+          <input
+            type="text"
+            name="supplierName"
+            [(ngModel)]="supplierForm.supplierName"
+            placeholder="e.g. Apex Industrial Supplies"
+            required
+          />
+        </label>
+
+        <label class="form-field">
+          <span>Email address</span>
+          <input
+            type="email"
+            name="email"
+            [(ngModel)]="supplierForm.email"
+            placeholder="contact@supplier.com"
+            email
+          />
+        </label>
+
+        <label class="form-field">
+          <span>Phone number</span>
+          <input
+            type="tel"
+            name="phone"
+            [(ngModel)]="supplierForm.phone"
+            placeholder="Enter phone number"
+          />
+        </label>
+
+        <label class="form-field">
+          <span>Address</span>
+          <textarea
+            name="address"
+            [(ngModel)]="supplierForm.address"
+            placeholder="Enter supplier address"
+            rows="3"
+          ></textarea>
+        </label>
+      </div>
+
+      <div class="form-actions">
+        <button
+          class="secondary-button"
+          type="button"
+          (click)="resetForm()"
+          *ngIf="editingId !== null"
+        >
+          Cancel edit
+        </button>
+
+        <button
+          class="primary-button"
+          type="submit"
+          [disabled]="supplierFormElement.invalid || saving"
+        >
+          {{
+            saving
+              ? 'Saving...'
+              : editingId === null
+                ? 'Save supplier'
+                : 'Update supplier'
+          }}
+          <span *ngIf="!saving">→</span>
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <section class="supplier-list-card">
+    <div class="list-heading">
+      <div>
+        <h2>Supplier directory</h2>
+        <p>All supplier records registered in OrderCraft.</p>
+      </div>
+
+      <div class="supplier-count">
+        <strong>{{ suppliers.length }}</strong>
+        <span>Suppliers</span>
+      </div>
+    </div>
+
+    <div class="table-toolbar">
+      <div class="search-box">
+        <span>⌕</span>
+        <input
+          type="search"
+          placeholder="Search suppliers..."
+          #searchInput
+          (input)="searchTerm = searchInput.value"
+        />
+      </div>
+
+      <button
+        class="refresh-button"
+        type="button"
+        (click)="loadSuppliers()"
+      >
+        ↻ <span>Refresh</span>
+      </button>
+    </div>
+
+    <div class="loading-state" *ngIf="loading">
+      <span class="loading-spinner"></span>
+      Loading supplier records...
+    </div>
+
+    <div class="table-wrap" *ngIf="!loading">
+      <table>
+        <thead>
+          <tr>
+            <th>Supplier</th>
+            <th>Email address</th>
+            <th>Phone</th>
+            <th>Address</th>
+            <th class="actions-heading">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let supplier of filteredSuppliers">
+            <td>
+              <div class="supplier-cell">
+                <div class="supplier-avatar">
+                  {{ supplier.supplierName.charAt(0).toUpperCase() }}
+                </div>
+
+                <div>
+                  <strong>{{ supplier.supplierName }}</strong>
+                  <small>Supplier #{{ supplier.id }}</small>
+                </div>
+              </div>
+            </td>
+
+            <td>{{ supplier.email || '—' }}</td>
+            <td>{{ supplier.phone || '—' }}</td>
+            <td class="address-cell">{{ supplier.address || '—' }}</td>
+
+            <td>
+              <div class="row-actions">
+                <button
+                  class="text-action edit-action"
+                  type="button"
+                  (click)="editSupplier(supplier)"
+                >
+                  Edit
+                </button>
+
+                <button
+                  class="text-action delete-action"
+                  type="button"
+                  (click)="deleteSupplier(supplier)"
+                >
+                  Delete
+                </button>
+              </div>
+            </td>
+          </tr>
+
+          <tr *ngIf="filteredSuppliers.length === 0">
+            <td colspan="5">
+              <div class="empty-state">
+                <div class="empty-icon">♙</div>
+
+                <strong>
+                  {{
+                    suppliers.length === 0
+                      ? 'No suppliers yet'
+                      : 'No matching suppliers'
+                  }}
+                </strong>
+
+                <p>
+                  {{
+                    suppliers.length === 0
+                      ? 'Add your first supplier using the form above.'
+                      : 'Try another search term.'
+                  }}
+                </p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>

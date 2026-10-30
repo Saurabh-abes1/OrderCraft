@@ -1,0 +1,214 @@
+<div class="invoices-page">
+  <div class="page-header">
+    <div>
+      <p class="eyebrow">ORDERCRAFT / FINANCE</p>
+      <h1>Invoices</h1>
+      <p class="page-subtitle">
+        Create and manage customer invoices and track their payment status.
+      </p>
+    </div>
+
+    <button class="btn btn-secondary" type="button" (click)="refreshPageData()">
+      ↻ Refresh
+    </button>
+  </div>
+
+  <div class="alert alert-success" *ngIf="message">
+    {{ message }}
+  </div>
+
+  <div class="alert alert-error" *ngIf="errorMessage">
+    {{ errorMessage }}
+  </div>
+
+  <section class="invoice-form-card">
+    <div class="section-heading">
+      <div>
+        <h2>{{ isEditing ? 'Edit Invoice' : 'Create Invoice' }}</h2>
+        <p>
+          {{ isEditing
+            ? 'Update the selected invoice details.'
+            : 'Enter the details below to create a customer invoice.' }}
+        </p>
+      </div>
+
+      <span class="form-badge">{{ isEditing ? 'EDITING' : 'NEW INVOICE' }}</span>
+    </div>
+
+    <form (ngSubmit)="saveInvoice()" #invoiceForm="ngForm">
+      <div class="form-grid">
+        <div class="form-field">
+          <label for="invoiceNumber">Invoice Number</label>
+          <input
+            id="invoiceNumber"
+            name="invoiceNumber"
+            type="text"
+            [(ngModel)]="form.invoiceNumber"
+            placeholder="e.g. INV-2026-001"
+            required
+          />
+        </div>
+
+        <div class="form-field">
+          <label for="customerId">Customer</label>
+          <select
+            id="customerId"
+            name="customerId"
+            [(ngModel)]="form.customerId"
+            required
+          >
+            <option [ngValue]="null" disabled>Select a customer</option>
+            <option *ngFor="let customer of customers" [ngValue]="customer.id">
+              {{ customer.customerName }}
+              <ng-container *ngIf="customer.companyName">
+                — {{ customer.companyName }}
+              </ng-container>
+            </option>
+          </select>
+
+          <small *ngIf="customers.length === 0">
+            No customers available. Add a customer first.
+          </small>
+        </div>
+
+        <div class="form-field">
+          <label for="invoiceDate">Invoice Date</label>
+          <input
+            id="invoiceDate"
+            name="invoiceDate"
+            type="date"
+            [(ngModel)]="form.invoiceDate"
+            required
+          />
+        </div>
+
+        <div class="form-field">
+          <label for="totalAmount">Total Amount (₹)</label>
+          <input
+            id="totalAmount"
+            name="totalAmount"
+            type="number"
+            min="0"
+            step="0.01"
+            [(ngModel)]="form.totalAmount"
+            placeholder="Enter invoice amount"
+            required
+          />
+        </div>
+
+        <div class="form-field">
+          <label for="status">Invoice Status</label>
+          <select
+            id="status"
+            name="status"
+            [(ngModel)]="form.status"
+            required
+          >
+            <option value="UNPAID">Unpaid</option>
+            <option value="PARTIALLY_PAID">Partially Paid</option>
+            <option value="PAID">Paid</option>
+          </select>
+          <small>
+            Payment activity can update this status automatically.
+          </small>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button
+          class="btn btn-primary"
+          type="submit"
+          [disabled]="saving"
+        >
+          {{ saving ? 'Saving...' : (isEditing ? 'Save Changes' : 'Create Invoice') }}
+        </button>
+
+        <button
+          class="btn btn-secondary"
+          type="button"
+          (click)="resetForm()"
+        >
+          Clear Form
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <section class="invoice-list-card">
+    <div class="list-heading">
+      <div>
+        <h2>Invoice Records</h2>
+        <p>Invoices currently saved in OrderCraft.</p>
+      </div>
+
+      <span class="record-count">{{ invoices.length }} records</span>
+    </div>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Invoice</th>
+            <th>Customer</th>
+            <th>Invoice Date</th>
+            <th>Total Amount</th>
+            <th>Status</th>
+            <th class="actions-heading">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngIf="loading">
+            <td colspan="6" class="table-message">Loading invoices...</td>
+          </tr>
+
+          <tr *ngIf="!loading && invoices.length === 0">
+            <td colspan="6" class="table-message">
+              No invoices found. Create your first invoice using the form above.
+            </td>
+          </tr>
+
+          <tr *ngFor="let invoice of invoices">
+            <td>
+              <span class="invoice-number">{{ invoice.invoiceNumber }}</span>
+            </td>
+
+            <td>{{ getCustomerName(invoice) }}</td>
+
+            <td>{{ invoice.invoiceDate | date: 'mediumDate' }}</td>
+
+            <td class="amount-cell">
+              {{ invoice.totalAmount | currency: 'INR':'symbol':'1.2-2' }}
+            </td>
+
+            <td>
+              <span class="status-badge" [ngClass]="getStatusClass(invoice.status)">
+                {{ invoice.status.replace('_', ' ') }}
+              </span>
+            </td>
+
+            <td>
+              <div class="row-actions">
+                <button
+                  class="action-btn edit-btn"
+                  type="button"
+                  (click)="editInvoice(invoice)"
+                >
+                  Edit
+                </button>
+
+                <button
+                  class="action-btn delete-btn"
+                  type="button"
+                  (click)="deleteInvoice(invoice)"
+                >
+                  Delete
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>

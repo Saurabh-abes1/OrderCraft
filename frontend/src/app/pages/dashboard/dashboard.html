@@ -1,0 +1,976 @@
+<div class="dashboard-content">
+
+  <!-- ========================================= -->
+  <!-- PAGE HEADER -->
+  <!-- ========================================= -->
+
+  <section class="page-heading">
+
+    <div>
+      <div class="eyebrow">YOUR BUSINESS AT A GLANCE</div>
+
+      <h1>
+        Good morning, Administrator <span>✦</span>
+      </h1>
+
+      <p>
+        Here’s what’s happening across your manufacturing operations.
+      </p>
+    </div>
+
+    <div class="heading-actions">
+
+      <button
+        class="refresh-button"
+        type="button"
+        (click)="refreshDashboard()"
+        [disabled]="loading">
+
+        <span [class.spinning]="loading">↻</span>
+        Refresh
+
+      </button>
+
+      <a
+        class="primary-button"
+        routerLink="/purchase-orders">
+
+        <span>＋</span>
+        Create new order
+
+      </a>
+
+    </div>
+
+  </section>
+
+
+  <!-- ========================================= -->
+  <!-- ERROR MESSAGE -->
+  <!-- ========================================= -->
+
+  <div
+    class="dashboard-alert"
+    *ngIf="errorMessage">
+
+    <span>!</span>
+
+    <div>
+      <strong>Some information could not be loaded.</strong>
+      <small>{{ errorMessage }}</small>
+    </div>
+
+    <button
+      type="button"
+      (click)="refreshDashboard()">
+
+      Try again
+
+    </button>
+
+  </div>
+
+
+  <!-- ========================================= -->
+  <!-- LOADING -->
+  <!-- ========================================= -->
+
+  <div
+    class="dashboard-loading"
+    *ngIf="loading">
+
+    <div class="loading-spinner"></div>
+
+    <div>
+      <strong>Loading dashboard...</strong>
+      <small>Fetching your latest business data</small>
+    </div>
+
+  </div>
+
+
+  <!-- ========================================= -->
+  <!-- KPI CARDS -->
+  <!-- ========================================= -->
+
+  <section class="metrics-grid">
+
+    <a
+      class="metric-card"
+      routerLink="/customers">
+
+      <div class="metric-top">
+        <div class="metric-icon customers-icon">♙</div>
+        <span class="metric-tag">CUSTOMERS</span>
+      </div>
+
+      <div class="metric-value">
+        {{ totalCustomers }}
+      </div>
+
+      <div class="metric-label">
+        Total customers
+      </div>
+
+      <div class="metric-footer">
+        Your registered customer accounts
+      </div>
+
+    </a>
+
+
+    <a
+      class="metric-card"
+      routerLink="/products">
+
+      <div class="metric-top">
+        <div class="metric-icon products-icon">▤</div>
+        <span class="metric-tag">INVENTORY</span>
+      </div>
+
+      <div class="metric-value">
+        {{ totalProducts }}
+      </div>
+
+      <div class="metric-label">
+        Products
+      </div>
+
+      <div class="metric-footer">
+        Products in your catalog
+      </div>
+
+    </a>
+
+
+    <a
+      class="metric-card"
+      routerLink="/purchase-orders">
+
+      <div class="metric-top">
+        <div class="metric-icon orders-icon">⇄</div>
+        <span class="metric-tag">PROCUREMENT</span>
+      </div>
+
+      <div class="metric-value">
+        {{ totalPurchaseOrders }}
+      </div>
+
+      <div class="metric-label">
+        Purchase orders
+      </div>
+
+      <div class="metric-footer">
+        Orders placed with suppliers
+      </div>
+
+    </a>
+
+
+    <a
+      class="metric-card"
+      routerLink="/invoices">
+
+      <div class="metric-top">
+        <div class="metric-icon invoices-icon">▣</div>
+        <span class="metric-tag">FINANCE</span>
+      </div>
+
+      <div class="metric-value">
+        {{ totalInvoices }}
+      </div>
+
+      <div class="metric-label">
+        Total invoices
+      </div>
+
+      <div class="metric-footer">
+        Invoices recorded in OrderCraft
+      </div>
+
+    </a>
+
+  </section>
+
+
+  <!-- ========================================= -->
+  <!-- FINANCIAL OVERVIEW -->
+  <!-- ========================================= -->
+
+  <section class="financial-grid">
+
+    <article class="financial-card">
+
+      <div class="financial-icon">
+        ₹
+      </div>
+
+      <div class="financial-content">
+
+        <span class="financial-label">
+          TOTAL INVOICE VALUE
+        </span>
+
+        <strong>
+          ₹{{ totalInvoiceValue | number:'1.2-2' }}
+        </strong>
+
+        <small>
+          Value of all recorded invoices
+        </small>
+
+      </div>
+
+    </article>
+
+
+    <article class="financial-card">
+
+      <div class="financial-icon">
+        ✓
+      </div>
+
+      <div class="financial-content">
+
+        <span class="financial-label">
+          PAYMENTS RECEIVED
+        </span>
+
+        <strong>
+          ₹{{ totalPaymentsReceived | number:'1.2-2' }}
+        </strong>
+
+        <small>
+          Total customer payments received
+        </small>
+
+      </div>
+
+    </article>
+
+
+    <article class="financial-card">
+
+      <div class="financial-icon">
+        ◷
+      </div>
+
+      <div class="financial-content">
+
+        <span class="financial-label">
+          OUTSTANDING AMOUNT
+        </span>
+
+        <strong>
+          ₹{{ outstandingAmount | number:'1.2-2' }}
+        </strong>
+
+        <small>
+          Remaining amount to be collected
+        </small>
+
+      </div>
+
+    </article>
+
+  </section>
+
+
+  <!-- ========================================= -->
+  <!-- BUSINESS SUMMARY + WORKFLOW -->
+  <!-- ========================================= -->
+
+  <section class="dashboard-grid">
+
+
+    <!-- BUSINESS SUMMARY -->
+
+    <article class="panel activity-panel">
+
+      <div class="panel-heading">
+
+        <div>
+          <h2>Business summary</h2>
+
+          <p>
+            Live information from your OrderCraft workspace
+          </p>
+        </div>
+
+        <span class="panel-badge">
+          LIVE
+        </span>
+
+      </div>
+
+
+      <div class="quick-actions">
+
+        <a routerLink="/customers">
+
+          <span class="quick-action-icon">♙</span>
+
+          <span>
+            <strong>
+              {{ totalCustomers }} customers
+            </strong>
+
+            <small>
+              Registered customer accounts
+            </small>
+          </span>
+
+          <span class="action-arrow">
+            →
+          </span>
+
+        </a>
+
+
+        <a routerLink="/products">
+
+          <span class="quick-action-icon">▤</span>
+
+          <span>
+            <strong>
+              {{ totalProducts }} products
+            </strong>
+
+            <small>
+              Products available in catalog
+            </small>
+          </span>
+
+          <span class="action-arrow">
+            →
+          </span>
+
+        </a>
+
+
+        <a routerLink="/suppliers">
+
+          <span class="quick-action-icon">♧</span>
+
+          <span>
+            <strong>
+              {{ totalSuppliers }} suppliers
+            </strong>
+
+            <small>
+              Suppliers registered in the system
+            </small>
+          </span>
+
+          <span class="action-arrow">
+            →
+          </span>
+
+        </a>
+
+
+        <a routerLink="/purchase-orders">
+
+          <span class="quick-action-icon">⇄</span>
+
+          <span>
+            <strong>
+              {{ totalPurchaseOrders }} purchase orders
+            </strong>
+
+            <small>
+              Orders placed with suppliers
+            </small>
+          </span>
+
+          <span class="action-arrow">
+            →
+          </span>
+
+        </a>
+
+
+        <a routerLink="/invoices">
+
+          <span class="quick-action-icon">▣</span>
+
+          <span>
+            <strong>
+              {{ totalInvoices }} invoices
+            </strong>
+
+            <small>
+              Customer invoices recorded
+            </small>
+          </span>
+
+          <span class="action-arrow">
+            →
+          </span>
+
+        </a>
+
+
+        <a routerLink="/payments">
+
+          <span class="quick-action-icon">₹</span>
+
+          <span>
+            <strong>
+              {{ totalPayments }} payments
+            </strong>
+
+            <small>
+              Payments recorded in the system
+            </small>
+          </span>
+
+          <span class="action-arrow">
+            →
+          </span>
+
+        </a>
+
+      </div>
+
+    </article>
+
+
+    <!-- ORDER TO CASH -->
+
+    <article class="panel workflow-panel">
+
+      <div class="panel-heading">
+
+        <div>
+          <h2>Order-to-cash workflow</h2>
+
+          <p>
+            From customer request to payment
+          </p>
+        </div>
+
+      </div>
+
+
+      <div class="workflow-list">
+
+        <a
+          class="workflow-step"
+          routerLink="/customers">
+
+          <div class="workflow-number">
+            01
+          </div>
+
+          <div class="workflow-copy">
+
+            <strong>
+              Customer order
+            </strong>
+
+            <small>
+              Capture customer requirements
+            </small>
+
+          </div>
+
+          <span class="workflow-arrow">
+            →
+          </span>
+
+        </a>
+
+
+        <a
+          class="workflow-step"
+          routerLink="/boms">
+
+          <div class="workflow-number">
+            02
+          </div>
+
+          <div class="workflow-copy">
+
+            <strong>
+              Bill of Materials
+            </strong>
+
+            <small>
+              Define required materials
+            </small>
+
+          </div>
+
+          <span class="workflow-arrow">
+            →
+          </span>
+
+        </a>
+
+
+        <a
+          class="workflow-step"
+          routerLink="/purchase-orders">
+
+          <div class="workflow-number">
+            03
+          </div>
+
+          <div class="workflow-copy">
+
+            <strong>
+              Procurement
+            </strong>
+
+            <small>
+              Coordinate supplier orders
+            </small>
+
+          </div>
+
+          <span class="workflow-arrow">
+            →
+          </span>
+
+        </a>
+
+
+        <a
+          class="workflow-step"
+          routerLink="/invoices">
+
+          <div class="workflow-number">
+            04
+          </div>
+
+          <div class="workflow-copy">
+
+            <strong>
+              Invoice &amp; payment
+            </strong>
+
+            <small>
+              Track billing and collections
+            </small>
+
+          </div>
+
+          <span class="workflow-arrow">
+            →
+          </span>
+
+        </a>
+
+      </div>
+
+    </article>
+
+  </section>
+
+
+  <!-- ========================================= -->
+  <!-- QUICK ACTIONS -->
+  <!-- ========================================= -->
+
+  <section class="panel quick-panel">
+
+    <div class="panel-heading">
+
+      <div>
+        <h2>Quick actions</h2>
+
+        <p>
+          Jump directly to common OrderCraft tasks
+        </p>
+      </div>
+
+    </div>
+
+
+    <div class="quick-action-grid">
+
+      <a routerLink="/customers">
+        <span>♙</span>
+        <strong>Add customer</strong>
+        <small>Register a new customer</small>
+      </a>
+
+
+      <a routerLink="/products">
+        <span>▤</span>
+        <strong>Add product</strong>
+        <small>Create a catalog item</small>
+      </a>
+
+
+      <a routerLink="/boms">
+        <span>⌘</span>
+        <strong>Create BOM</strong>
+        <small>Define required materials</small>
+      </a>
+
+
+      <a routerLink="/purchase-orders">
+        <span>⇄</span>
+        <strong>Create purchase order</strong>
+        <small>Place a supplier order</small>
+      </a>
+
+
+      <a routerLink="/invoices">
+        <span>▣</span>
+        <strong>Create invoice</strong>
+        <small>Generate customer billing</small>
+      </a>
+
+
+      <a routerLink="/payments">
+        <span>₹</span>
+        <strong>Record payment</strong>
+        <small>Track customer collection</small>
+      </a>
+
+    </div>
+
+  </section>
+
+
+  <!-- ========================================= -->
+  <!-- RECENT ACTIVITY -->
+  <!-- ========================================= -->
+
+  <section class="recent-grid">
+
+
+    <!-- RECENT INVOICES -->
+
+    <article class="panel recent-panel">
+
+      <div class="panel-heading">
+
+        <div>
+          <h2>Recent invoices</h2>
+
+          <p>
+            Latest billing activity
+          </p>
+        </div>
+
+        <a routerLink="/invoices">
+          View all →
+        </a>
+
+      </div>
+
+
+      <div
+        class="recent-list"
+        *ngIf="recentInvoices.length > 0">
+
+        <div
+          class="recent-item"
+          *ngFor="let invoice of recentInvoices">
+
+          <div class="recent-icon invoice-recent-icon">
+            ▣
+          </div>
+
+          <div class="recent-main">
+
+            <strong>
+              {{ invoice.invoiceNumber }}
+            </strong>
+
+            <small>
+              {{ getCustomerName(invoice) }}
+            </small>
+
+          </div>
+
+          <div class="recent-right">
+
+            <strong>
+              ₹{{ invoice.totalAmount | number:'1.2-2' }}
+            </strong>
+
+            <span
+              class="status-badge"
+              [ngClass]="getInvoiceStatusClass(invoice.status)">
+
+              {{ getInvoiceStatusLabel(invoice.status) }}
+
+            </span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div
+        class="empty-state"
+        *ngIf="recentInvoices.length === 0">
+
+        <span>▣</span>
+
+        <strong>No invoices yet</strong>
+
+        <small>
+          Create your first invoice to see it here.
+        </small>
+
+      </div>
+
+    </article>
+
+
+    <!-- RECENT PAYMENTS -->
+
+    <article class="panel recent-panel">
+
+      <div class="panel-heading">
+
+        <div>
+          <h2>Recent payments</h2>
+
+          <p>
+            Latest collection activity
+          </p>
+        </div>
+
+        <a routerLink="/payments">
+          View all →
+        </a>
+
+      </div>
+
+
+      <div
+        class="recent-list"
+        *ngIf="recentPayments.length > 0">
+
+        <div
+          class="recent-item"
+          *ngFor="let payment of recentPayments">
+
+          <div class="recent-icon payment-recent-icon">
+            ₹
+          </div>
+
+          <div class="recent-main">
+
+            <strong>
+              {{ payment.invoice?.invoiceNumber || 'Payment' }}
+            </strong>
+
+            <small>
+              {{ getPaymentMethodLabel(payment.paymentMethod) }}
+            </small>
+
+          </div>
+
+          <div class="recent-right">
+
+            <strong>
+              ₹{{ payment.amount | number:'1.2-2' }}
+            </strong>
+
+            <small>
+              {{ payment.paymentDate | date:'dd MMM yyyy' }}
+            </small>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div
+        class="empty-state"
+        *ngIf="recentPayments.length === 0">
+
+        <span>₹</span>
+
+        <strong>No payments yet</strong>
+
+        <small>
+          Recorded payments will appear here.
+        </small>
+
+      </div>
+
+    </article>
+
+
+    <!-- RECENT PURCHASE ORDERS -->
+
+    <article class="panel recent-panel">
+
+      <div class="panel-heading">
+
+        <div>
+          <h2>Recent purchase orders</h2>
+
+          <p>
+            Latest procurement activity
+          </p>
+        </div>
+
+        <a routerLink="/purchase-orders">
+          View all →
+        </a>
+
+      </div>
+
+
+      <div
+        class="recent-list"
+        *ngIf="recentPurchaseOrders.length > 0">
+
+        <div
+          class="recent-item"
+          *ngFor="let order of recentPurchaseOrders">
+
+          <div class="recent-icon order-recent-icon">
+            ⇄
+          </div>
+
+          <div class="recent-main">
+
+            <strong>
+              {{ getPurchaseOrderReference(order) }}
+            </strong>
+
+            <small>
+              {{ getPurchaseOrderSupplier(order) }}
+            </small>
+
+          </div>
+
+          <div class="recent-right">
+
+            <span class="activity-link">
+              Open →
+            </span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div
+        class="empty-state"
+        *ngIf="recentPurchaseOrders.length === 0">
+
+        <span>⇄</span>
+
+        <strong>No purchase orders yet</strong>
+
+        <small>
+          Supplier orders will appear here.
+        </small>
+
+      </div>
+
+    </article>
+
+
+    <!-- RECENT CUSTOMERS -->
+
+    <article class="panel recent-panel">
+
+      <div class="panel-heading">
+
+        <div>
+          <h2>Recent customers</h2>
+
+          <p>
+            Latest customer registrations
+          </p>
+        </div>
+
+        <a routerLink="/customers">
+          View all →
+        </a>
+
+      </div>
+
+
+      <div
+        class="recent-list"
+        *ngIf="recentCustomers.length > 0">
+
+        <div
+          class="recent-item"
+          *ngFor="let customer of recentCustomers">
+
+          <div class="recent-avatar">
+            {{ customer.customerName.charAt(0).toUpperCase() }}
+          </div>
+
+          <div class="recent-main">
+
+            <strong>
+              {{ customer.customerName }}
+            </strong>
+
+            <small>
+              {{ customer.companyName || 'Customer account' }}
+            </small>
+
+          </div>
+
+          <div class="recent-right">
+
+            <span class="activity-link">
+              View →
+            </span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div
+        class="empty-state"
+        *ngIf="recentCustomers.length === 0">
+
+        <span>♙</span>
+
+        <strong>No customers yet</strong>
+
+        <small>
+          Add a customer to get started.
+        </small>
+
+      </div>
+
+    </article>
+
+  </section>
+
+
+  <!-- ========================================= -->
+  <!-- FOOTER -->
+  <!-- ========================================= -->
+
+  <footer class="dashboard-footer">
+
+    <span>
+      OrderCraft Manufacturing Cloud
+    </span>
+
+    <span>
+      Operations made clear.
+    </span>
+
+  </footer>
+
+</div>

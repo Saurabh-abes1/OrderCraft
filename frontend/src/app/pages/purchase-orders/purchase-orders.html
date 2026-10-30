@@ -1,0 +1,293 @@
+<div class="purchase-orders-page">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div>
+      <p class="eyebrow">PROCUREMENT MANAGEMENT</p>
+      <h1>Purchase Orders</h1>
+      <p class="page-description">
+        Create and manage purchase orders from your suppliers.
+      </p>
+    </div>
+
+    <div class="header-badge">
+      <span class="badge-dot"></span>
+      Order Management
+    </div>
+  </div>
+
+  <!-- Notifications -->
+  <div *ngIf="successMessage" class="notice success-notice">
+    {{ successMessage }}
+  </div>
+
+  <div *ngIf="errorMessage" class="notice error-notice">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Purchase Order Form -->
+  <section class="form-card">
+    <div class="section-heading">
+      <div>
+        <p class="section-kicker">
+          {{ editingId !== null ? 'UPDATE ORDER' : 'NEW ORDER' }}
+        </p>
+
+        <h2>
+          {{ editingId !== null ? 'Edit Purchase Order' : 'Create Purchase Order' }}
+        </h2>
+
+        <p class="section-description">
+          Enter the supplier and order details below.
+        </p>
+      </div>
+
+      <div class="form-step">
+        <span>{{ editingId !== null ? 'EDIT' : '01' }}</span>
+      </div>
+    </div>
+
+    <form #purchaseOrderForm="ngForm" (ngSubmit)="savePurchaseOrder()">
+
+      <div class="form-grid">
+
+        <!-- Supplier -->
+        <div class="form-field">
+          <label for="supplierId">Supplier <span class="required">*</span></label>
+
+          <select
+            id="supplierId"
+            name="supplierId"
+            [(ngModel)]="orderForm.supplierId"
+            required
+          >
+            <option [ngValue]="null" disabled>Select a supplier</option>
+
+            <option
+              *ngFor="let supplier of suppliers"
+              [ngValue]="supplier.id"
+            >
+              {{ supplier.supplierName }}
+            </option>
+          </select>
+
+          <small *ngIf="suppliers.length === 0" class="field-hint">
+            No suppliers found. Add a supplier before creating an order.
+          </small>
+        </div>
+
+        <!-- Order Date -->
+        <div class="form-field">
+          <label for="orderDate">Order Date <span class="required">*</span></label>
+
+          <input
+            id="orderDate"
+            type="date"
+            name="orderDate"
+            [(ngModel)]="orderForm.orderDate"
+            required
+          />
+        </div>
+
+        <!-- Total Amount -->
+        <div class="form-field">
+          <label for="totalAmount">Total Amount (₹) <span class="required">*</span></label>
+
+          <div class="amount-input">
+            <span>₹</span>
+            <input
+              id="totalAmount"
+              type="number"
+              name="totalAmount"
+              [(ngModel)]="orderForm.totalAmount"
+              min="0"
+              step="0.01"
+              placeholder="Enter total amount"
+              required
+            />
+          </div>
+        </div>
+
+        <!-- Status -->
+        <div class="form-field">
+          <label for="status">Order Status <span class="required">*</span></label>
+
+          <select
+            id="status"
+            name="status"
+            [(ngModel)]="orderForm.status"
+            required
+          >
+            <option value="PENDING">Pending</option>
+            <option value="APPROVED">Approved</option>
+            <option value="RECEIVED">Received</option>
+            <option value="CANCELLED">Cancelled</option>
+          </select>
+        </div>
+
+      </div>
+
+      <div class="form-actions">
+        <button
+          type="button"
+          class="secondary-button"
+          (click)="resetForm()"
+        >
+          Clear
+        </button>
+
+        <button
+          type="submit"
+          class="primary-button"
+          [disabled]="saving || purchaseOrderForm.invalid || suppliers.length === 0"
+        >
+          {{ saving ? 'Saving...' : (editingId !== null ? 'Update Order' : 'Create Order') }}
+        </button>
+      </div>
+
+    </form>
+  </section>
+
+  <!-- Purchase Orders Table -->
+  <section class="list-card">
+
+    <div class="list-heading">
+      <div>
+        <p class="section-kicker">ORDER REGISTER</p>
+        <h2>All Purchase Orders</h2>
+        <p class="section-description">
+          Review and manage your purchase order records.
+        </p>
+      </div>
+
+      <div class="order-count">
+        <strong>{{ purchaseOrders.length }}</strong>
+        <span>Total Orders</span>
+      </div>
+    </div>
+
+    <!-- Search and Refresh -->
+    <div class="table-toolbar">
+      <div class="search-box">
+        <span class="search-icon">⌕</span>
+        <input
+          type="text"
+          name="searchTerm"
+          [(ngModel)]="searchTerm"
+          placeholder="Search by order ID, supplier, date or status..."
+          aria-label="Search purchase orders"
+        />
+      </div>
+
+      <button
+        type="button"
+        class="refresh-button"
+        (click)="loadPurchaseOrders()"
+        [disabled]="loading"
+      >
+        ↻ Refresh
+      </button>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="loading" class="loading-state">
+      <div class="loader"></div>
+      <p>Loading purchase orders...</p>
+    </div>
+
+    <!-- Table -->
+    <div *ngIf="!loading && filteredPurchaseOrders.length > 0" class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Supplier</th>
+            <th>Order Date</th>
+            <th>Total Amount</th>
+            <th>Status</th>
+            <th class="actions-heading">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let order of filteredPurchaseOrders">
+            <td>
+              <span class="order-id">
+                #PO-{{ order.id }}
+              </span>
+            </td>
+
+            <td>
+              <div class="supplier-cell">
+                <span class="supplier-avatar">
+                  {{ (order.supplier?.supplierName || 'S').charAt(0).toUpperCase() }}
+                </span>
+
+                <span>
+                  {{ order.supplier?.supplierName || 'Supplier #' + order.supplierId }}
+                </span>
+              </div>
+            </td>
+
+            <td>{{ order.orderDate | date:'mediumDate' }}</td>
+
+            <td class="amount-cell">
+              {{ order.totalAmount | currency:'INR':'symbol':'1.2-2' }}
+            </td>
+
+            <td>
+              <span
+                class="status-badge"
+                [ngClass]="'status-' + order.status.toLowerCase()"
+              >
+                {{ order.status }}
+              </span>
+            </td>
+
+            <td>
+              <div class="row-actions">
+                <button
+                  type="button"
+                  class="text-action edit-action"
+                  (click)="editPurchaseOrder(order)"
+                >
+                  Edit
+                </button>
+
+                <button
+                  type="button"
+                  class="text-action delete-action"
+                  (click)="deletePurchaseOrder(order)"
+                >
+                  Delete
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Empty State -->
+    <div
+      *ngIf="!loading && filteredPurchaseOrders.length === 0"
+      class="empty-state"
+    >
+      <div class="empty-icon">▤</div>
+
+      <h3>
+        {{ searchTerm ? 'No matching orders found' : 'No purchase orders yet' }}
+      </h3>
+
+      <p>
+        {{
+          searchTerm
+            ? 'Try a different search term.'
+            : 'Create your first purchase order using the form above.'
+        }}
+      </p>
+    </div>
+
+  </section>
+
+</div>

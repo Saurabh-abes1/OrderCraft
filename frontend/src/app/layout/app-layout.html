@@ -1,0 +1,156 @@
+<div class="app-shell">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+
+    <div class="brand">
+      <div class="brand-mark">O</div>
+
+      <div class="brand-name">
+        <span>OrderCraft</span>
+        <small>MANUFACTURING CLOUD</small>
+      </div>
+    </div>
+
+    <div class="workspace-label">WORKSPACE</div>
+
+    <nav class="navigation">
+
+      <!-- Overview -->
+      <a
+        class="nav-link"
+        routerLink="/dashboard"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }">
+        <span class="nav-icon">▦</span>
+        <span>Overview</span>
+      </a>
+
+      <div class="nav-section-label">OPERATIONS</div>
+
+      <!-- Customers -->
+      <a
+        class="nav-link"
+        routerLink="/customers"
+        routerLinkActive="active">
+        <span class="nav-icon">♙</span>
+        <span>Customers</span>
+      </a>
+
+      <!-- Products -->
+      <a
+        class="nav-link"
+        routerLink="/products"
+        routerLinkActive="active">
+        <span class="nav-icon">▤</span>
+        <span>Products</span>
+      </a>
+
+      <!-- Bill of Materials -->
+      <a
+        class="nav-link"
+        routerLink="/boms"
+        routerLinkActive="active">
+        <span class="nav-icon">▧</span>
+        <span>Bill of Materials</span>
+      </a>
+
+      <!-- Suppliers -->
+      <a
+        class="nav-link"
+        routerLink="/suppliers"
+        routerLinkActive="active">
+        <span class="nav-icon">♧</span>
+        <span>Suppliers</span>
+      </a>
+
+      <!-- Purchase Orders -->
+      <a
+        class="nav-link"
+        routerLink="/purchase-orders"
+        routerLinkActive="active">
+        <span class="nav-icon">⇄</span>
+        <span>Purchase Orders</span>
+      </a>
+
+      <div class="nav-section-label">FINANCE</div>
+
+      <!-- Invoices -->
+      <a
+        class="nav-link"
+        routerLink="/invoices"
+        routerLinkActive="active">
+        <span class="nav-icon">▣</span>
+        <span>Invoices</span>
+      </a>
+
+      <!-- Payments -->
+      <a
+        class="nav-link"
+        routerLink="/payments"
+        routerLinkActive="active">
+        <span class="nav-icon">₹</span>
+        <span>Payments</span>
+      </a>
+
+    </nav>
+
+    <div class="sidebar-bottom">
+
+      <div class="help-card">
+        <div class="help-icon">✦</div>
+        <strong>Need assistance?</strong>
+        <p>Find guidance for your workspace.</p>
+        <a href="#">Visit help center <span>↗</span></a>
+      </div>
+
+      <div class="user-profile">
+        <div class="avatar">A</div>
+
+        <div class="user-details">
+          <strong>Administrator</strong>
+          <small>Workspace Admin</small>
+        </div>
+
+        <span class="profile-menu">•••</span>
+      </div>
+
+    </div>
+
+  </aside>
+
+  <!-- Main Application -->
+  <main class="main-area">
+
+    <header class="topbar">
+
+      <div class="breadcrumb">
+        <span>Workspace</span>
+        <span class="breadcrumb-divider">/</span>
+        <strong>OrderCraft</strong>
+      </div>
+
+      <div class="topbar-actions">
+
+        <div class="system-status">
+          <span class="status-dot"></span>
+          All systems operational
+        </div>
+
+        <button class="icon-button" aria-label="Notifications">
+          ♧
+          <span class="notification-dot"></span>
+        </button>
+
+        <div class="topbar-avatar">A</div>
+
+      </div>
+
+    </header>
+
+    <!-- The selected page appears here -->
+    <router-outlet></router-outlet>
+
+  </main>
+
+</div>

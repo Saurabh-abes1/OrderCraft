@@ -1,0 +1,322 @@
+<div class="payments-page">
+
+  <!-- Page Header -->
+  <div class="page-header">
+
+    <div>
+      <div class="eyebrow">FINANCE</div>
+
+      <h1>Payments</h1>
+
+      <p>
+        Record and track customer payments against invoices.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="refresh-btn"
+      (click)="refreshPageData()">
+      ↻ Refresh
+    </button>
+
+  </div>
+
+  <!-- Success Message -->
+  <div
+    *ngIf="message"
+    class="alert success-alert">
+    {{ message }}
+  </div>
+
+  <!-- Error Message -->
+  <div
+    *ngIf="errorMessage"
+    class="alert error-alert">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Payment Form -->
+  <section class="form-card">
+
+    <div class="section-heading">
+
+      <div>
+        <span class="section-kicker">NEW PAYMENT</span>
+
+        <h2>Record Payment</h2>
+
+        <p>
+          Add a payment received against an invoice.
+        </p>
+      </div>
+
+    </div>
+
+    <form (ngSubmit)="savePayment()">
+
+      <div class="form-grid">
+
+        <!-- Invoice -->
+        <div class="form-group">
+
+          <label for="invoice">
+            Invoice
+          </label>
+
+          <select
+            id="invoice"
+            name="invoiceId"
+            [(ngModel)]="form.invoiceId"
+            required>
+
+            <option [ngValue]="null">
+              Select invoice
+            </option>
+
+            <option
+              *ngFor="let invoice of invoices"
+              [ngValue]="invoice.id">
+
+              {{ invoice.invoiceNumber }}
+              -
+              {{ invoice.customer?.customerName }}
+
+            </option>
+
+          </select>
+
+          <small *ngIf="invoices.length === 0">
+            No invoices available.
+          </small>
+
+        </div>
+
+        <!-- Amount -->
+        <div class="form-group">
+
+          <label for="amount">
+            Payment Amount
+          </label>
+
+          <div class="input-with-prefix">
+            <span>₹</span>
+
+            <input
+              id="amount"
+              type="number"
+              name="amount"
+              [(ngModel)]="form.amount"
+              min="0.01"
+              step="0.01"
+              placeholder="Enter amount"
+              required />
+          </div>
+
+        </div>
+
+        <!-- Payment Date -->
+        <div class="form-group">
+
+          <label for="paymentDate">
+            Payment Date
+          </label>
+
+          <input
+            id="paymentDate"
+            type="date"
+            name="paymentDate"
+            [(ngModel)]="form.paymentDate"
+            required />
+
+        </div>
+
+        <!-- Payment Method -->
+        <div class="form-group">
+
+          <label for="paymentMethod">
+            Payment Method
+          </label>
+
+          <select
+            id="paymentMethod"
+            name="paymentMethod"
+            [(ngModel)]="form.paymentMethod"
+            required>
+
+            <option value="CASH">Cash</option>
+            <option value="BANK_TRANSFER">Bank Transfer</option>
+            <option value="UPI">UPI</option>
+            <option value="CARD">Card</option>
+            <option value="CHEQUE">Cheque</option>
+
+          </select>
+
+        </div>
+
+      </div>
+
+      <!-- Form Actions -->
+      <div class="form-actions">
+
+        <button
+          type="button"
+          class="secondary-btn"
+          (click)="resetForm()">
+          Clear
+        </button>
+
+        <button
+          type="submit"
+          class="primary-btn"
+          [disabled]="saving">
+
+          <span *ngIf="!saving">
+            Record Payment
+          </span>
+
+          <span *ngIf="saving">
+            Saving...
+          </span>
+
+        </button>
+
+      </div>
+
+    </form>
+
+  </section>
+
+  <!-- Payments Table -->
+  <section class="table-card">
+
+    <div class="table-header">
+
+      <div>
+        <span class="section-kicker">PAYMENT HISTORY</span>
+
+        <h2>Recorded Payments</h2>
+
+        <p>
+          View all payments recorded in OrderCraft.
+        </p>
+      </div>
+
+      <div class="record-count">
+        {{ payments.length }} payment{{ payments.length === 1 ? '' : 's' }}
+      </div>
+
+    </div>
+
+    <!-- Loading -->
+    <div
+      *ngIf="loading"
+      class="state-message">
+
+      Loading payments...
+
+    </div>
+
+    <!-- Empty State -->
+    <div
+      *ngIf="!loading && payments.length === 0"
+      class="state-message empty-state">
+
+      <div class="empty-icon">₹</div>
+
+      <h3>No payments recorded</h3>
+
+      <p>
+        Record your first payment using the form above.
+      </p>
+
+    </div>
+
+    <!-- Table -->
+    <div
+      *ngIf="!loading && payments.length > 0"
+      class="table-wrapper">
+
+      <table>
+
+        <thead>
+          <tr>
+            <th>Payment ID</th>
+            <th>Invoice</th>
+            <th>Invoice Total</th>
+            <th>Amount Paid</th>
+            <th>Payment Date</th>
+            <th>Payment Method</th>
+            <th>Invoice Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          <tr *ngFor="let payment of payments">
+
+            <td>
+              <span class="payment-id">
+                #{{ payment.id }}
+              </span>
+            </td>
+
+            <td>
+              <strong>
+                {{ getInvoiceNumber(payment) }}
+              </strong>
+            </td>
+
+            <td>
+              ₹{{ getInvoiceTotal(payment) | number:'1.2-2' }}
+            </td>
+
+            <td>
+              <strong class="amount-paid">
+                ₹{{ payment.amount | number:'1.2-2' }}
+              </strong>
+            </td>
+
+            <td>
+              {{ payment.paymentDate | date:'dd MMM yyyy' }}
+            </td>
+
+            <td>
+              <span class="method-badge">
+                {{ payment.paymentMethod.replace('_', ' ') }}
+              </span>
+            </td>
+
+            <td>
+              <span
+                class="status-badge"
+                [ngClass]="getStatusClass(payment.invoice.status)">
+
+                {{ payment.invoice.status.replace('_', ' ') }}
+
+              </span>
+            </td>
+
+            <td>
+
+              <button
+                type="button"
+                class="delete-btn"
+                (click)="deletePayment(payment)">
+                Delete
+              </button>
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+</div>

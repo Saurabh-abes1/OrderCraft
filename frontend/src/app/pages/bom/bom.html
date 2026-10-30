@@ -1,0 +1,254 @@
+<div class="bom-page">
+
+  <!-- Page heading -->
+  <div class="page-heading">
+    <div>
+      <span class="eyebrow">MANUFACTURING</span>
+      <h1>Bill of Materials</h1>
+      <p>
+        Manage the raw materials and quantities required to manufacture your products.
+      </p>
+    </div>
+
+    <button
+      class="refresh-button"
+      type="button"
+      (click)="refreshPageData()"
+    >
+      ↻ Refresh
+    </button>
+  </div>
+
+  <!-- Success message -->
+  <div class="alert success-alert" *ngIf="message">
+    {{ message }}
+  </div>
+
+  <!-- Error message -->
+  <div class="alert error-alert" *ngIf="errorMessage">
+    {{ errorMessage }}
+  </div>
+
+  <!-- BOM form -->
+  <section class="bom-card form-card">
+
+    <div class="card-heading">
+      <div>
+        <h2>{{ isEditing ? 'Edit BOM Item' : 'Add BOM Item' }}</h2>
+        <p>Enter the product and material details below.</p>
+      </div>
+
+      <span class="form-badge">
+        {{ isEditing ? 'EDIT MODE' : 'NEW ENTRY' }}
+      </span>
+    </div>
+
+    <form (ngSubmit)="saveBom()" #bomForm="ngForm">
+
+      <div class="form-grid">
+
+        <!-- Finished product dropdown -->
+        <div class="form-group">
+          <label for="productId">
+            Finished Product <span>*</span>
+          </label>
+
+          <select
+            id="productId"
+            name="productId"
+            [(ngModel)]="form.productId"
+            required
+          >
+            <option [ngValue]="null" disabled>
+              Select a product
+            </option>
+
+            <option
+              *ngFor="let product of products"
+              [ngValue]="product.id"
+            >
+              {{ product.productName }} — {{ product.sku }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Material name -->
+        <div class="form-group">
+          <label for="materialName">
+            Material Name <span>*</span>
+          </label>
+
+          <input
+            id="materialName"
+            type="text"
+            name="materialName"
+            [(ngModel)]="form.materialName"
+            placeholder="e.g. Steel Sheet"
+            required
+          />
+        </div>
+
+        <!-- Quantity -->
+        <div class="form-group">
+          <label for="quantity">
+            Quantity Required <span>*</span>
+          </label>
+
+          <input
+            id="quantity"
+            type="number"
+            name="quantity"
+            [(ngModel)]="form.quantity"
+            min="0.01"
+            step="0.01"
+            placeholder="Enter quantity"
+            required
+          />
+        </div>
+
+        <!-- Unit -->
+        <div class="form-group">
+          <label for="unit">
+            Unit <span>*</span>
+          </label>
+
+          <input
+            id="unit"
+            type="text"
+            name="unit"
+            [(ngModel)]="form.unit"
+            placeholder="e.g. kg, pcs, metres"
+            required
+          />
+        </div>
+
+      </div>
+
+      <!-- Form buttons -->
+      <div class="form-actions">
+
+        <button
+          class="primary-button"
+          type="submit"
+          [disabled]="bomForm.invalid"
+        >
+          {{ isEditing ? 'Save Changes' : '＋ Add BOM Item' }}
+        </button>
+
+        <button
+          *ngIf="isEditing"
+          class="secondary-button"
+          type="button"
+          (click)="resetForm()"
+        >
+          Cancel
+        </button>
+
+      </div>
+
+    </form>
+  </section>
+
+  <!-- BOM records table -->
+  <section class="bom-card table-card">
+
+    <div class="card-heading">
+      <div>
+        <h2>BOM Records</h2>
+        <p>Materials currently associated with your products.</p>
+      </div>
+
+      <span class="record-count">
+        {{ boms.length }} {{ boms.length === 1 ? 'item' : 'items' }}
+      </span>
+    </div>
+
+    <!-- Loading state -->
+    <div class="loading-state" *ngIf="loading">
+      Loading BOM records...
+    </div>
+
+    <!-- Empty state -->
+    <div
+      class="empty-state"
+      *ngIf="!loading && boms.length === 0"
+    >
+      <div class="empty-icon">▤</div>
+      <h3>No BOM items yet</h3>
+      <p>
+        Add a material above to start defining your product requirements.
+      </p>
+    </div>
+
+    <!-- Records table -->
+    <div
+      class="table-wrapper"
+      *ngIf="!loading && boms.length > 0"
+    >
+      <table>
+
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Material</th>
+            <th>Quantity</th>
+            <th>Unit</th>
+            <th class="actions-column">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let bom of boms">
+
+            <td>
+              <div class="product-cell">
+                <span class="product-icon">P</span>
+                <span>
+                  {{ bom.product?.productName || 'Unknown product' }}
+                </span>
+              </div>
+            </td>
+
+            <td>{{ bom.materialName }}</td>
+
+            <td class="quantity-cell">
+              {{ bom.quantity }}
+            </td>
+
+            <td>
+              <span class="unit-badge">
+                {{ bom.unit }}
+              </span>
+            </td>
+
+            <td class="actions-column">
+              <div class="action-buttons">
+
+                <button
+                  class="edit-button"
+                  type="button"
+                  (click)="editBom(bom)"
+                >
+                  Edit
+                </button>
+
+                <button
+                  class="delete-button"
+                  type="button"
+                  (click)="deleteBom(bom.id)"
+                >
+                  Delete
+                </button>
+
+              </div>
+            </td>
+
+          </tr>
+        </tbody>
+
+      </table>
+    </div>
+
+  </section>
+
+</div>

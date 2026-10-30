@@ -1,0 +1,201 @@
+<div class="customers-page">
+  <header class="page-header">
+    <div>
+      <div class="eyebrow">CUSTOMER RELATIONSHIPS</div>
+      <h1>Customers</h1>
+      <p>Manage your customer accounts and company information.</p>
+    </div>
+
+    <button class="primary-button" type="button"
+      (click)="resetForm(); successMessage = ''; errorMessage = ''">
+      <span>＋</span> Add customer
+    </button>
+  </header>
+
+  <div class="notice success-notice" *ngIf="successMessage">
+    <span>✓</span> {{ successMessage }}
+  </div>
+
+  <div class="notice error-notice" *ngIf="errorMessage">
+    <span>!</span> {{ errorMessage }}
+  </div>
+
+  <section class="customer-form-card">
+    <div class="section-heading">
+      <div>
+        <h2>{{ editingId === null ? 'Add a customer' : 'Edit customer' }}</h2>
+        <p>
+          {{ editingId === null
+            ? 'Enter the details to create a customer account.'
+            : 'Update the customer information below.' }}
+        </p>
+      </div>
+      <span class="form-step">{{ editingId === null ? 'NEW ACCOUNT' : 'EDITING' }}</span>
+    </div>
+
+    <form #customerFormElement="ngForm" (ngSubmit)="saveCustomer()">
+      <div class="form-grid">
+        <label class="form-field">
+          <span>Customer name <b>*</b></span>
+          <input
+            type="text"
+            name="customerName"
+            [(ngModel)]="customerForm.customerName"
+            placeholder="e.g. Acme Industries"
+            required
+          />
+        </label>
+
+        <label class="form-field">
+          <span>Company name</span>
+          <input
+            type="text"
+            name="companyName"
+            [(ngModel)]="customerForm.companyName"
+            placeholder="Enter company name"
+          />
+        </label>
+
+        <label class="form-field">
+          <span>Email address <b>*</b></span>
+          <input
+            type="email"
+            name="email"
+            [(ngModel)]="customerForm.email"
+            placeholder="name@company.com"
+            required
+            email
+          />
+        </label>
+
+        <label class="form-field">
+          <span>Phone number</span>
+          <input
+            type="tel"
+            name="phone"
+            [(ngModel)]="customerForm.phone"
+            placeholder="Enter phone number"
+          />
+        </label>
+      </div>
+
+      <div class="form-actions">
+        <button
+          class="secondary-button"
+          type="button"
+          (click)="resetForm()"
+          *ngIf="editingId !== null">
+          Cancel edit
+        </button>
+
+        <button
+          class="primary-button"
+          type="submit"
+          [disabled]="customerFormElement.invalid || saving">
+          {{ saving ? 'Saving...' : editingId === null ? 'Save customer' : 'Update customer' }}
+          <span *ngIf="!saving">→</span>
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <section class="customer-list-card">
+    <div class="list-heading">
+      <div>
+        <h2>Customer directory</h2>
+        <p>All customer accounts registered in OrderCraft.</p>
+      </div>
+
+      <div class="customer-count">
+        <strong>{{ customers.length }}</strong>
+        <span>Customers</span>
+      </div>
+    </div>
+
+    <div class="table-toolbar">
+      <div class="search-box">
+        <span>⌕</span>
+        <input
+          type="search"
+          placeholder="Search customers..."
+          #searchInput
+          (input)="searchTerm = searchInput.value"
+        />
+      </div>
+
+      <button class="refresh-button" type="button" (click)="loadCustomers()">
+        ↻ <span>Refresh</span>
+      </button>
+    </div>
+
+    <div class="loading-state" *ngIf="loading">
+      <span class="loading-spinner"></span>
+      Loading customer records...
+    </div>
+
+    <div class="table-wrap" *ngIf="!loading">
+      <table>
+        <thead>
+          <tr>
+            <th>Customer</th>
+            <th>Company</th>
+            <th>Email address</th>
+            <th>Phone</th>
+            <th class="actions-heading">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let customer of filteredCustomers">
+            <td>
+              <div class="customer-cell">
+                <div class="customer-avatar">
+                  {{ customer.customerName.charAt(0).toUpperCase() }}
+                </div>
+                <div>
+                  <strong>{{ customer.customerName }}</strong>
+                  <small>Customer #{{ customer.id }}</small>
+                </div>
+              </div>
+            </td>
+
+            <td>{{ customer.companyName || '—' }}</td>
+            <td>{{ customer.email }}</td>
+            <td>{{ customer.phone || '—' }}</td>
+
+            <td>
+              <div class="row-actions">
+                <button
+                  class="text-action edit-action"
+                  type="button"
+                  (click)="editCustomer(customer)">
+                  Edit
+                </button>
+                <button
+                  class="text-action delete-action"
+                  type="button"
+                  (click)="deleteCustomer(customer)">
+                  Delete
+                </button>
+              </div>
+            </td>
+          </tr>
+
+          <tr *ngIf="filteredCustomers.length === 0">
+            <td colspan="5">
+              <div class="empty-state">
+                <div class="empty-icon">♙</div>
+                <strong>{{ customers.length === 0 ? 'No customers yet' : 'No matching customers' }}</strong>
+                <p>
+                  {{ customers.length === 0
+                    ? 'Add your first customer using the form above.'
+                    : 'Try another search term.' }}
+                </p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>

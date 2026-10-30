@@ -1,0 +1,257 @@
+<div class="products-page">
+  <header class="page-header">
+    <div>
+      <div class="eyebrow">PRODUCT CATALOG</div>
+      <h1>Products</h1>
+      <p>Manage the products manufactured and supplied through OrderCraft.</p>
+    </div>
+
+    <button
+      class="primary-button"
+      type="button"
+      (click)="resetForm(); successMessage = ''; errorMessage = ''"
+    >
+      <span>＋</span> Add product
+    </button>
+  </header>
+
+  <div class="notice success-notice" *ngIf="successMessage">
+    <span>✓</span> {{ successMessage }}
+  </div>
+
+  <div class="notice error-notice" *ngIf="errorMessage">
+    <span>!</span> {{ errorMessage }}
+  </div>
+
+  <section class="product-form-card">
+    <div class="section-heading">
+      <div>
+        <h2>{{ editingId === null ? 'Add a product' : 'Edit product' }}</h2>
+        <p>
+          {{
+            editingId === null
+              ? 'Enter the product details to add it to your catalog.'
+              : 'Update the product information below.'
+          }}
+        </p>
+      </div>
+
+      <span class="form-step">
+        {{ editingId === null ? 'NEW PRODUCT' : 'EDITING' }}
+      </span>
+    </div>
+
+    <form #productFormElement="ngForm" (ngSubmit)="saveProduct()">
+      <div class="form-grid">
+        <label class="form-field">
+          <span>Product name <b>*</b></span>
+          <input
+            type="text"
+            name="productName"
+            [(ngModel)]="productForm.productName"
+            placeholder="e.g. Industrial Steel Bracket"
+            required
+          />
+        </label>
+
+        <label class="form-field">
+          <span>SKU <b>*</b></span>
+          <input
+            type="text"
+            name="sku"
+            [(ngModel)]="productForm.sku"
+            placeholder="e.g. STL-BRK-001"
+            required
+          />
+        </label>
+
+        <label class="form-field">
+          <span>Unit price <b>*</b></span>
+          <input
+            type="number"
+            name="unitPrice"
+            [(ngModel)]="productForm.unitPrice"
+            placeholder="Enter unit price"
+            min="0"
+            step="0.01"
+            required
+          />
+        </label>
+
+        <label class="form-field">
+          <span>Unit</span>
+          <input
+            type="text"
+            name="unit"
+            [(ngModel)]="productForm.unit"
+            placeholder="e.g. piece, kg, box"
+          />
+        </label>
+
+        <label class="form-field full-width">
+          <span>Description</span>
+          <textarea
+            name="description"
+            [(ngModel)]="productForm.description"
+            placeholder="Add product specifications or details..."
+            rows="3"
+          ></textarea>
+        </label>
+      </div>
+
+      <div class="form-actions">
+        <button
+          class="secondary-button"
+          type="button"
+          (click)="resetForm()"
+          *ngIf="editingId !== null"
+        >
+          Cancel edit
+        </button>
+
+        <button
+          class="primary-button"
+          type="submit"
+          [disabled]="productFormElement.invalid || saving"
+        >
+          {{
+            saving
+              ? 'Saving...'
+              : editingId === null
+                ? 'Save product'
+                : 'Update product'
+          }}
+          <span *ngIf="!saving">→</span>
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <section class="product-list-card">
+    <div class="list-heading">
+      <div>
+        <h2>Product directory</h2>
+        <p>All products registered in the OrderCraft catalog.</p>
+      </div>
+
+      <div class="product-count">
+        <strong>{{ products.length }}</strong>
+        <span>Products</span>
+      </div>
+    </div>
+
+    <div class="table-toolbar">
+      <div class="search-box">
+        <span>⌕</span>
+        <input
+          type="search"
+          placeholder="Search products..."
+          #searchInput
+          (input)="searchTerm = searchInput.value"
+        />
+      </div>
+
+      <button
+        class="refresh-button"
+        type="button"
+        (click)="loadProducts()"
+      >
+        ↻ <span>Refresh</span>
+      </button>
+    </div>
+
+    <div class="loading-state" *ngIf="loading">
+      <span class="loading-spinner"></span>
+      Loading product records...
+    </div>
+
+    <div class="table-wrap" *ngIf="!loading">
+      <table>
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>SKU</th>
+            <th>Unit price</th>
+            <th>Unit</th>
+            <th>Description</th>
+            <th class="actions-heading">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let product of filteredProducts">
+            <td>
+              <div class="product-cell">
+                <div class="product-avatar">
+                  {{ product.productName.charAt(0).toUpperCase() }}
+                </div>
+                <div>
+                  <strong>{{ product.productName }}</strong>
+                  <small>Product #{{ product.id }}</small>
+                </div>
+              </div>
+            </td>
+
+            <td>
+              <span class="sku-badge">{{ product.sku }}</span>
+            </td>
+
+            <td class="price-cell">
+              {{ product.unitPrice | currency:'INR':'symbol':'1.2-2' }}
+            </td>
+
+            <td>{{ product.unit || '—' }}</td>
+
+            <td class="description-cell">
+              {{ product.description || '—' }}
+            </td>
+
+            <td>
+              <div class="row-actions">
+                <button
+                  class="text-action edit-action"
+                  type="button"
+                  (click)="editProduct(product)"
+                >
+                  Edit
+                </button>
+
+                <button
+                  class="text-action delete-action"
+                  type="button"
+                  (click)="deleteProduct(product)"
+                >
+                  Delete
+                </button>
+              </div>
+            </td>
+          </tr>
+
+          <tr *ngIf="filteredProducts.length === 0">
+            <td colspan="6">
+              <div class="empty-state">
+                <div class="empty-icon">▦</div>
+
+                <strong>
+                  {{
+                    products.length === 0
+                      ? 'No products yet'
+                      : 'No matching products'
+                  }}
+                </strong>
+
+                <p>
+                  {{
+                    products.length === 0
+                      ? 'Add your first product using the form above.'
+                      : 'Try another search term.'
+                  }}
+                </p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
