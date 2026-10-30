@@ -61,15 +61,4 @@ OrderCraft/
 │
 ├── .gitignore
 └── README.md
-```
 
-## ⚙️ Installation and Setup
-
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/Saurabh-abes1/OrderCraft.git
-cd OrderCraft
-```
-
-### 2
